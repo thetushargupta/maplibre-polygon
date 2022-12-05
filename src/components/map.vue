@@ -11,7 +11,7 @@ const defaultCoords = {
 };
 
 onMounted(async () => {
-  const map = new maplibregl.Map({
+  const map: any = new maplibregl.Map({
     container: "map",
     style:
       "https://api.maptiler.com/maps/streets-v2/style.json?key=Wsytqqzjlw8eejm6lW3O",
@@ -56,7 +56,7 @@ onMounted(async () => {
 
   //mapbox draw
 
-  const draw = new MapboxDraw({
+  const draw: any = new MapboxDraw({
     userProperties: true,
     displayControlsDefault: false,
     controls: {
@@ -67,18 +67,19 @@ onMounted(async () => {
     },
   });
 
-  const draw2 = new MapboxDraw({
-    userProperties: true,
-  });
+  // const draw2 = new MapboxDraw({
+  //   userProperties: true,
+  // });
 
   console.log("draw obj,,,,,");
-  console.log(draw2);
+  console.log(draw);
+
+  map.addControl(draw);
 
   map.on("load", function () {
-    map.addControl(draw);
-    map.on("draw.add", (e) => console.log("add...", e.features));
-    map.on("draw.update", (e) => console.log("update...", e.features));
-    map.on("draw.delete", (e) => console.log("delete...", e.features));
+    map.on("draw.add", (e: any) => console.log("add...", e.features));
+    map.on("draw.update", (e: any) => console.log("update...", e.features));
+    map.on("draw.delete", (e: any) => console.log("delete...", e.features));
   });
 });
 </script>
