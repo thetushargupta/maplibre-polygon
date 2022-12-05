@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { onMounted } from "vue";
-import "maplibre-gl/dist/maplibre-gl.css";
+import { onMounted, ref } from "vue";
 import maplibregl from "maplibre-gl";
+import "maplibre-gl/dist/maplibre-gl.css";
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css";
 
@@ -10,8 +10,10 @@ const defaultCoords = {
   lng: 55.279792,
 };
 
+const geoJsondata = ref<any>("");
+
 onMounted(async () => {
-  const map = new maplibregl.Map({
+  const map: any = new maplibregl.Map({
     container: "map",
     style:
       "https://api.maptiler.com/maps/streets-v2/style.json?key=Wsytqqzjlw8eejm6lW3O",
@@ -21,6 +23,8 @@ onMounted(async () => {
     maxZoom: 15,
   });
 
+  // zoom in and zoom out controls
+
   map.addControl(
     new maplibregl.NavigationControl({
       visualizePitch: true,
@@ -29,14 +33,15 @@ onMounted(async () => {
   );
 
   // gives you your location
-  map.addControl(
-    new maplibregl.GeolocateControl({
-      positionOptions: {
-        enableHighAccuracy: true,
-      },
-      trackUserLocation: true,
-    })
-  );
+
+  const userlocation = new maplibregl.GeolocateControl({
+    positionOptions: {
+      enableHighAccuracy: true,
+    },
+    trackUserLocation: true,
+  });
+
+  // map.addControl(userlocation);
 
   // marker
   const marker = new maplibregl.Marker({
@@ -56,7 +61,7 @@ onMounted(async () => {
 
   //mapbox draw
 
-  const draw = new MapboxDraw({
+  const draw: any = new MapboxDraw({
     userProperties: true,
     displayControlsDefault: false,
     controls: {
@@ -67,41 +72,82 @@ onMounted(async () => {
     },
   });
 
-  const draw2 = new MapboxDraw({
-    userProperties: true,
-  });
+  // const draw2 = new MapboxDraw({
+  //   userProperties: true,
+  // });
 
   console.log("draw obj,,,,,");
-  console.log(draw2);
+  console.log(draw);
+
+  // control box added
+  map.addControl(draw);
 
   map.on("load", function () {
-    map.addControl(draw);
-    map.on("draw.add", (e) => console.log("add...", e.features));
-    map.on("draw.update", (e) => console.log("update...", e.features));
-    map.on("draw.delete", (e) => console.log("delete...", e.features));
+    map.on("draw.add", (e: any) => console.log("add...", e.features));
+    map.on("draw.update", (e: any) => console.log("update...", e.features));
+    map.on("draw.delete", (e: any) => console.log("delete...", e.features));
+    userlocation.trigger();
+  });
+
+  // save geojson data
+  const save = document.getElementById("save") as HTMLElement;
+
+  save.addEventListener("click", function () {
+    let data = draw.getAll();
+    console.log(JSON.stringify(data));
+    geoJsondata.value = JSON.stringify(data);
+    console.log("latitude= ", userlocation._userLocationDotMarker._lngLat.lat);
+    console.log("longitude= ", userlocation._userLocationDotMarker._lngLat.lng);
+  });
+
+  const todubai = document.getElementById("dubai") as HTMLElement;
+
+  todubai.addEventListener("click", function () {
+    marker.setLngLat(defaultCoords);
+
+    map.flyTo({
+      center: defaultCoords,
+      zoom: 14,
+      speed: 2,
+      curve: 1,
+    });
+  });
+
+  const mylocation = document.getElementById("mylocation") as HTMLElement;
+
+  mylocation.addEventListener("click", function () {
+    // const myCoords = {
+    //   lng: userlocation._userLocationDotMarker._lngLat.lng,
+    //   lat: userlocation._userLocationDotMarker._lngLat.lat,
+    // };
+
+    console.log(userlocation);
+
+    // marker.setLngLat(myCoords);
+
+    // map.flyTo({
+    //   center: myCoords,
+    //   zoom: 14,
+    //   speed: 2,
+    //   curve: 1,
+    // });
   });
 });
 </script>
 
 <template>
-  <div id="map"></div>
+  <div class="relative">
+    <div id="map"></div>
+    <div class="absolute bottom-2 left-2 space-x-2">
+      <button class="btn btn-primary min-h-0 h-7" id="save">save</button>
+      <button class="btn btn-primary min-h-0 h-7" id="dubai">Dubai</button>
+      <button class="btn btn-primary min-h-0 h-7" id="mylocation">
+        MyLocation
+      </button>
+    </div>
+  </div>
+
+  <div>{{ geoJsondata }}</div>
 </template>
 
-<style scoped>
-.calculation-box {
-  height: 75px;
-  width: 150px;
-  position: absolute;
-  bottom: 40px;
-  left: 10px;
-  background-color: rgba(255, 255, 255, 0.9);
-  padding: 15px;
-  text-align: center;
-}
-
-p {
-  font-family: "Open Sans";
-  margin: 0;
-  font-size: 13px;
-}
-</style>
+<style scoped></style>

@@ -3,7 +3,6 @@ import Map from "./components/map.vue";
 </script>
 
 <template>
-  <div>hello</div>
   <Map />
 </template>
 
